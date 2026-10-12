@@ -1,0 +1,418 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Tokens de diseño. El color de marca (--brand) se inyecta desde la configuración
+ * de la tienda en el layout raíz; el resto se deriva para claro y oscuro.
+ */
+:root {
+  --brand: #2563eb;
+  --background: #f4f6fb;
+  --foreground: #0a1420;
+  --surface: #ffffff;
+  --surface-2: #eef2f9;
+  --border: #e3e9f2;
+  --muted: #5c6675;
+  --primary: var(--brand);
+  --primary-hover: color-mix(in oklab, var(--brand) 82%, #0a1420);
+  --primary-soft: color-mix(in oklab, var(--brand) 9%, white);
+  --primary-foreground: #ffffff;
+  --success: #15803d;
+  --success-soft: #e8f7ee;
+  --warning: #b45309;
+  --warning-soft: #fff4e0;
+  --danger: #c62828;
+  --danger-soft: #fdecec;
+  --ring: color-mix(in oklab, var(--brand) 45%, white);
+  --shadow-card: 0 1px 2px rgb(10 20 32 / 0.04), 0 8px 24px rgb(10 20 32 / 0.05);
+  color-scheme: light;
+}
+
+.dark {
+  --background: #060a12;
+  --foreground: #e8edf6;
+  --surface: #0d1420;
+  --surface-2: #16202f;
+  --border: #22304a;
+  --muted: #96a3b9;
+  --primary: color-mix(in oklab, var(--brand) 85%, white);
+  --primary-hover: color-mix(in oklab, var(--brand) 70%, white);
+  --primary-soft: color-mix(in oklab, var(--brand) 26%, #0d1420);
+  --primary-foreground: #060a12;
+  --success: #4ade80;
+  --success-soft: #11291c;
+  --warning: #fbbf24;
+  --warning-soft: #2c2210;
+  --danger: #f87171;
+  --danger-soft: #2f1618;
+  --ring: color-mix(in oklab, var(--brand) 62%, white);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 24px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: var(--shadow-card);
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-slide-in-right: slide-in-right 0.25s ease-out both;
+  --animate-slide-in-left: slide-in-left 0.25s ease-out both;
+  --animate-slide-up: slide-up 0.25s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  dialog::backdrop {
+    background: rgb(2 6 23 / 0.55);
+    backdrop-filter: blur(2px);
+  }
+  ::selection {
+    background: var(--primary-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Transiciones entre páginas (View Transitions API vía <ViewTransition> de React).
+ * Solo se activan al navegar: fade corto + leve desplazamiento vertical (8px),
+ * con curvas suaves y duración total por debajo de 250ms.
+ */
+::view-transition-old(.page-exit) {
+  animation: 140ms cubic-bezier(0.4, 0, 1, 1) both page-exit;
+}
+::view-transition-new(.page-enter) {
+  animation: 220ms cubic-bezier(0, 0, 0.2, 1) 40ms both page-enter;
+}
+@keyframes page-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* El overlay de la transición no debe bloquear clics mientras dura. */
+::view-transition {
+  pointer-events: none;
+}
+/* El bloque global de arriba no alcanza a los pseudo-elementos: acá se aplica. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/*
+ * Cargador de navegación (ver page-loader.tsx): mientras carga la página
+ * siguiente, un carrito recorre una pequeña pista sobre un panel con el halo de
+ * la marca. `--brand` se inyecta desde la configuración de la tienda y
+ * `--surface` acompaña el tema claro/oscuro. Nunca bloquea la interacción.
+ */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 60; /* por encima de header/dropdowns/lightbox (z-50) */
+  display: grid;
+  place-items: center;
+  pointer-events: none; /* la navegación nunca queda bloqueada */
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity;
+  transition:
+    opacity 180ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s linear 180ms;
+  background:
+    radial-gradient(
+      120% 75% at 50% 58%,
+      color-mix(in oklab, var(--brand) 12%, transparent),
+      transparent 72%
+    ),
+    var(--surface);
+}
+.page-loader.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 150ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s;
+}
+
+/* Pista: riel con el color de la marca que se desvanece en los extremos. */
+.page-loader__track {
+  --loader-track-w: min(300px, 64vw);
+  position: relative;
+  width: var(--loader-track-w);
+  height: 48px;
+}
+.page-loader__rail {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--brand) 55%, transparent) 18%,
+    color-mix(in oklab, var(--brand) 55%, transparent) 82%,
+    transparent 100%
+  );
+}
+/*
+ * El carrito entra por la izquierda, recorre la pista y sale por la derecha
+ * (650 ms por pasada). La animación queda aplicada en pausa: al levantarse el
+ * panel el carrito se congela donde estaba y se funde junto con él, sin saltos.
+ */
+.page-loader__cart {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  color: var(--brand); /* el azul principal de la tienda como acento */
+  animation: page-loader-travel 650ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-play-state: paused;
+}
+.page-loader.is-active .page-loader__cart {
+  animation-play-state: running;
+}
+.page-loader__cart-icon {
+  width: 30px;
+  height: 30px;
+}
+/* Estelas cortas detrás del carrito: sensación de velocidad sin ruido. */
+.page-loader__streaks {
+  position: absolute;
+  top: 9px;
+  right: calc(100% + 6px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.page-loader__streak {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: page-loader-streak 420ms ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.page-loader.is-active .page-loader__streak {
+  animation-play-state: running;
+}
+.page-loader__streak:nth-child(1) {
+  width: 15px;
+}
+.page-loader__streak:nth-child(2) {
+  width: 9px;
+}
+
+@keyframes page-loader-travel {
+  0% {
+    transform: translateX(calc(-100% - 12px));
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--loader-track-w));
+    opacity: 0;
+  }
+}
+@keyframes page-loader-streak {
+  from {
+    opacity: 0.25;
+    transform: translateX(4px);
+  }
+  to {
+    opacity: 0.95;
+    transform: translateX(-2px);
+  }
+}
+
+/*
+ * Con el cargador tapando la página no hace falta animar la View Transition: se
+ * saltea (1 ms). Además evita que los pseudos muestren la página "desnuda" por
+ * encima del panel mientras dura la transición.
+ */
+.loader-skip-vt ::view-transition-old(*),
+.loader-skip-vt ::view-transition-new(*),
+.loader-skip-vt ::view-transition-group(*) {
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+}
+
+/* Sin movimiento: el carrito queda estático y centrado sobre la pista. */
+@media (prefers-reduced-motion: reduce) {
+  .page-loader.is-active .page-loader__cart,
+  .page-loader__cart {
+    animation: none;
+  }
+  .page-loader__cart {
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+  }
+  .page-loader.is-active .page-loader__streak,
+  .page-loader__streak {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply border-border bg-surface shadow-card rounded-2xl border;
+  }
+  .prose-legal h2 {
+    @apply mt-8 mb-3 text-lg font-semibold;
+  }
+  .prose-legal p,
+  .prose-legal li {
+    @apply text-muted leading-relaxed;
+  }
+  .prose-legal ul {
+    @apply list-disc space-y-1 pl-5;
+  }
+}
+
+/*
+ * Rediseño visual: utilidades de gradiente y acentos de marca.
+ * Únicas superficies con gradiente moderado (botones primarios y hero);
+ * el resto de la UI queda en tinta plana para mantener la estética premium.
+ */
+@layer components {
+  .bg-cta {
+    background-image: linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%);
+  }
+  .bg-cta-soft {
+    background-image: linear-gradient(
+      180deg,
+      var(--primary-soft) 0%,
+      color-mix(in oklab, var(--primary-soft) 70%, transparent) 100%
+    );
+  }
+  .text-gradient {
+    background: linear-gradient(
+      120deg,
+      #ffffff 0%,
+      color-mix(in oklab, var(--brand) 55%, #ffffff) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Fondo del hero: navy profundo con halo azul de marca (respetando ambos temas). */
+  .bg-hero {
+    background:
+      radial-gradient(
+        70% 60% at 85% -10%,
+        color-mix(in oklab, var(--brand) 30%, transparent),
+        transparent 68%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--brand) 16%, #05070d) 0%,
+        #05070d 60%,
+        #080d16 100%
+      );
+  }
+}
